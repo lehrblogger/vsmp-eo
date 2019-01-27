@@ -3,7 +3,7 @@
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script>
-            var getUrlParameter = function getUrlParameter(sParam) {
+            function getUrlParameter(sParam) {
                 var sPageURL = window.location.search.substring(1),
                     sURLVariables = sPageURL.split('&'),
                     sParameterName,
@@ -15,10 +15,13 @@
                     }
                 }
             };
-            var updateFrame = function getUrlParameter(number) {
-                $('#frame').attr('src', '../../../Desktop/frames/' + number + '.png');
+            function updateFrame(number) {
+                $('#frame').attr('src', frameURL(number));
                 $('#number').text(number);
             };
+            function frameURL(number) {
+                return '../../../Desktop/frames_cropped/' + number + '.png'
+            }
 
             var frame_number = parseInt(getUrlParameter('frame_number'));
             if (!frame_number) {
@@ -31,8 +34,16 @@
             var crop = getUrlParameter('crop') === 'true';
 
             setInterval(function(){
-                frame_number++;
-                updateFrame(frame_number);
+                $.ajax({
+                    url: frameURL(frame_number + 1),
+                    success: function(data) {
+                        frame_number++;
+                        updateFrame(frame_number);
+                    },
+                    error: function(xhr, error){
+                        updateFrame(frame_number);
+                    }
+                });
             }, 60 * 60 / fps * 1000);
 
             window.onload = function(){
