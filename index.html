@@ -16,7 +16,7 @@
                 }
             };
             function updateFrame(number) {
-                $('#frame').attr('src', frameURL(number));
+                $('#frame').css('background-image', 'url(' + frameURL(number) + ')');
                 $('#number').text(number);
             };
             function frameURL(number) {
@@ -49,8 +49,6 @@
             window.onload = function(){
                 if (crop) {
                     $('#frame').addClass('cropped');
-                } else {
-                    $('#frame').addClass('letterboxed');
                 }
                 updateFrame(frame_number);
             };
@@ -70,33 +68,33 @@
             }
             #frame {
                 position: fixed;
-            }
-            #frame.letterboxed {
+                width: 100%;
+                height: 100%;
                 top: 50%;
                 transform: translateY(-50%);
+                background-repeat: no-repeat;
+                background-position: center;
             }
             #frame.cropped {
-                top: 50%;
-                left: 50%;
-                transform: translateX(-50%) translateY(-50%);
-                height: 100%;
+                background-size: auto 1080px;
             }
             #number {
-                color: #666;
-                background-color: rgba(0,0,0,0.5);
+                background: inherit;
+                -webkit-background-clip: text;
+                        background-clip: text;
+                color: transparent;
+                filter: invert(1) grayscale(1) contrast(0);
+                text-align: left;
                 font-family: sans-serif;
-                font-size: 4pt;
-                padding: 2px;
-                position: fixed;
-                bottom: 0;
-                left: 0;
+                font-size: 7pt;
             }
         </style>
     </head>
     <body>
         <div id="container">
-            <img id="frame"/>
+            <div id="frame">
+                <div id="number"></div>
+            </div>
         </div>
-        <div id="number"></div>
     </body>
 </html>
