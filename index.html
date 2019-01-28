@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>Very Slow Movie Player for Electric Objects</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script>
+            // Define utility methods
             function getUrlParameter(sParam) {
                 var sPageURL = window.location.search.substring(1),
                     sURLVariables = sPageURL.split('&'),
@@ -23,6 +25,7 @@
                 return './frames/' + number + '.png'
             }
 
+            // Parse the URL parameters
             var frame_number = parseInt(getUrlParameter('frame'));
             if (!frame_number) {
                 frame_number = 1;
@@ -33,22 +36,22 @@
             }
             var crop = getUrlParameter('crop') === 'true';
 
+            // Display the frame
             setInterval(function(){
+                // First, check to make sure the next frame exists, otherwise stop where we are
+                // so that it's easy to pick up where we left off if the server went down
                 $.ajax({
                     url: frameURL(frame_number + 1),
                     success: function(data) {
                         frame_number++;
                         updateFrame(frame_number);
                     },
-                    error: function(xhr, error){
-                        updateFrame(frame_number);
-                    }
+                    error: function(xhr, error){}
                 });
-            }, 60 * 60 / fps * 1000);
-
+            }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
             window.onload = function(){
                 if (crop) {
-                    $('#frame').addClass('cropped');
+                    $('#frame').addClass('crop');
                 }
                 updateFrame(frame_number);
             };
@@ -58,6 +61,7 @@
                 margin: 0px;
                 background-color: #000;
             }
+            /* Rotate this div, so that we don't need to rotate the individual frames */
             #container {
                 position: fixed;
                 transform: rotate(90deg);
@@ -75,9 +79,10 @@
                 background-repeat: no-repeat;
                 background-position: center;
             }
-            #frame.cropped {
-                background-size: auto 1080px;
+            #frame.crop {
+                background-size: auto 100%;
             }
+            /* This text should be hardly noticeable, and barely legible, on the EO1 */
             #number {
                 background: inherit;
                 -webkit-background-clip: text;
