@@ -41,14 +41,12 @@
             setInterval(function(){
                 // First, check to make sure the next frame exists, otherwise stop where we are
                 // so that it's easy to pick up where we left off if the server went down
-                $.ajax({
-                    url: frameURL(frame_number + 1),
-                    success: function(data) {
-                        frame_number++;
-                        updateFrame(frame_number);
-                    },
-                    error: function(xhr, error){}
-                });
+                var bg = new Image();
+                bg.onload = function() {
+                    frame_number++;
+                    updateFrame(frame_number);
+                }
+                bg.src = frameURL(frame_number + 1)
             }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
             window.onload = function(){
                 if (crop) {
