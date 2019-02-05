@@ -32,9 +32,10 @@
             }
             var fps = parseFloat(getUrlParameter('fps'));
             if (!fps) {
-                fps = 24;
+                fps = 23.976216;
             }
             var crop = getUrlParameter('crop') === 'true';
+            var caption = getUrlParameter('caption') === 'true';
 
             // Display the frame
             setInterval(function(){
@@ -52,6 +53,9 @@
             window.onload = function(){
                 if (crop) {
                     $('#frame').addClass('crop');
+                }
+                if (!caption) {
+                    $('#number').hide();
                 }
                 updateFrame(frame_number);
             };
