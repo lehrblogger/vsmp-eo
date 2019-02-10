@@ -18,11 +18,11 @@
                 }
             };
             function updateFrame(number) {
-                $('#frame').css('background-image', 'url(' + frameURL(number) + ')');
+                $('#frame').css('background-image', 'url("' + frameURL(number) + '")');
                 $('#number').text(number);
             };
             function frameURL(number) {
-                return './frames/' + number + '.png'
+                return 'frames/' + number + '.png'
             }
 
             // Parse the URL parameters
@@ -37,15 +37,14 @@
             var crop = getUrlParameter('crop') === 'true';
             var caption = getUrlParameter('caption') === 'true';
 
-            // Display the frame
+            // Display the frame, but check to make sure the next frame exists, otherwise stop
+            // here so that it's easy to pick up where we left off if the server went down
+            var bg = new Image();
+            bg.onload = function() {
+                frame_number++;
+                updateFrame(frame_number);
+            }
             setInterval(function(){
-                // First, check to make sure the next frame exists, otherwise stop where we are
-                // so that it's easy to pick up where we left off if the server went down
-                var bg = new Image();
-                bg.onload = function() {
-                    frame_number++;
-                    updateFrame(frame_number);
-                }
                 bg.src = frameURL(frame_number + 1)
             }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
             window.onload = function(){
