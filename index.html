@@ -40,12 +40,14 @@
 
             // Display the frame, but check to make sure the next frame exists, otherwise stop
             // here so that it's easy to pick up where we left off if the server went down
-            var bg = new Image();
-            bg.onload = function() {
-                frame_number++;
-                updateFrame(frame_number);
-            }
             setInterval(function(){
+                var bg = new Image();
+                bg.onload = function() {
+                    frame_number++;
+                    updateFrame(frame_number);
+                    bg.onload = null;
+                    bg = null;
+                }
                 bg.src = frameURL(frame_number + 1);
             }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
             window.onload = function(){
