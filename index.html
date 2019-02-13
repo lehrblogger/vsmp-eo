@@ -19,8 +19,9 @@
                 }
             };
             function updateFrame(number) {
-                $('#frame').css('background-image', 'url("' + frameURL(number) + '")');
                 $('#number').text(number);
+                $('#frame'    ).css('background-image', 'url("' + frameURL(number    ) + '")');
+                $('#preloader').css('background-image', 'url("' + frameURL(number + 1) + '")');
             };
             function frameURL(number) {
                 return 'frames/' + number + '.png'
@@ -41,14 +42,13 @@
             // Display the frame, but check to make sure the next frame exists, otherwise stop
             // here so that it's easy to pick up where we left off if the server went down
             setInterval(function(){
-                var bg = new Image();
-                bg.onload = function() {
-                    frame_number++;
-                    updateFrame(frame_number);
-                    bg.onload = null;
-                    bg = null;
-                }
-                bg.src = frameURL(frame_number + 1);
+                $.ajax({
+                    url: frameURL(frame_number + 1),
+                    success: function(data) {
+                        frame_number++;
+                        updateFrame(frame_number);
+                    }
+                });
             }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
             window.onload = function(){
                 if (crop) {
@@ -97,6 +97,10 @@
                 font-family: sans-serif;
                 font-size: 8pt;
             }
+            #preloader {
+                display: none;
+                background-repeat: no-repeat;
+            }
         </style>
     </head>
     <body>
@@ -105,5 +109,6 @@
                 <div id="number"></div>
             </div>
         </div>
+        <div id="preloader"></div>
     </body>
 </html>
