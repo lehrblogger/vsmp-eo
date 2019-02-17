@@ -19,9 +19,21 @@
                 }
             };
             function updateFrame(number) {
-                $('#number').text(number);
-                $('#frame'    ).css('background-image', 'url("' + frameURL(number    ) + '")');
-                $('#preloader').css('background-image', 'url("' + frameURL(number + 1) + '")');
+                $('.number').text(number);
+                // We already have the next frame loaded, so switch to it
+                // But prepare the frame after this one, so we can swap them seamlessly
+                // And we need (re)set the current frame for the initial window.onload
+                if (number % 2) {
+                    $('#first' ).css('background-image', 'url("' + frameURL(number + 1) + '")');
+                    $('#first' ).hide();
+                    $('#second').css('background-image', 'url("' + frameURL(number    ) + '")');
+                    $('#second').show();
+                } else {
+                    $('#first' ).css('background-image', 'url("' + frameURL(number    ) + '")');
+                    $('#first' ).show();
+                    $('#second').css('background-image', 'url("' + frameURL(number + 1) + '")');
+                    $('#second').hide();
+                }
             };
             function frameURL(number) {
                 return 'frames/' + number + '.png'
@@ -52,10 +64,10 @@
             }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
             window.onload = function(){
                 if (crop) {
-                    $('#frame').addClass('crop');
+                    $('.frame').addClass('crop');
                 }
                 if (!caption) {
-                    $('#number').hide();
+                    $('.number').hide();
                 }
                 updateFrame(frame_number);
             };
@@ -74,7 +86,7 @@
                 height: 1080px;
                 left: 1080px;
             }
-            #frame {
+            .frame {
                 position: fixed;
                 width: 100%;
                 height: 100%;
@@ -82,12 +94,13 @@
                 transform: translateY(-50%);
                 background-repeat: no-repeat;
                 background-position: center;
+                display: block;
             }
-            #frame.crop {
+            .frame.crop {
                 background-size: auto 1080px;
             }
             /* This text should be hardly noticeable, and barely legible, on the EO1 */
-            #number {
+            .number {
                 background: inherit;
                 -webkit-background-clip: text;
                         background-clip: text;
@@ -97,18 +110,16 @@
                 font-family: sans-serif;
                 font-size: 8pt;
             }
-            #preloader {
-                display: none;
-                background-repeat: no-repeat;
-            }
         </style>
     </head>
     <body>
         <div id="container">
-            <div id="frame">
-                <div id="number"></div>
+            <div class="frame" id="first">
+                <div class="number"></div>
+            </div>
+            <div class="frame" id="second">
+                <div class="number"></div>
             </div>
         </div>
-        <div id="preloader"></div>
     </body>
 </html>
