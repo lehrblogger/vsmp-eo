@@ -6,18 +6,6 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script>
             // Define utility methods
-            function getUrlParameter(sParam) {
-                var sPageURL = window.location.search.substring(1),
-                    sURLVariables = sPageURL.split('&'),
-                    sParameterName,
-                    i;
-                for (i = 0; i < sURLVariables.length; i++) {
-                    sParameterName = sURLVariables[i].split('=');
-                    if (sParameterName[0] === sParam) {
-                        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-                    }
-                }
-            };
             function updateFrame(number) {
                 $('.number').text(number);
                 // We already have the next frame loaded, so switch to it
@@ -40,16 +28,17 @@
             }
 
             // Parse the URL parameters
-            var frame_number = parseInt(getUrlParameter('frame'));
+            var params = new URLSearchParams(location.search);
+            var frame_number = parseInt(params.get('frame'));
             if (!frame_number) {
                 frame_number = 1;
             }
-            var fps = parseFloat(getUrlParameter('fps'));
+            var fps = parseFloat(params.get('fps'));
             if (!fps) {
                 fps = 23.976216;
             }
-            var crop = getUrlParameter('crop') === 'true';
-            var caption = getUrlParameter('caption') === 'true';
+            var crop = params.get('crop') === 'true';
+            var caption = params.get('caption') === 'true';
 
             // Display the frame, but check to make sure the next frame exists, otherwise stop
             // here so that it's easy to pick up where we left off if the server went down
@@ -59,6 +48,8 @@
                     success: function(data) {
                         frame_number++;
                         updateFrame(frame_number);
+                        params.set('frame', frame_number);
+                        window.history.replaceState({}, '', `${location.pathname}?${params}`);
                     }
                 });
             }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
