@@ -14,37 +14,22 @@
             var crop = params.get('crop') === 'true';
 
             // Display the frame
-            function frameNext() {
-                return '/next.png?v=' + Date.now();
-            }
-            function frameCurrent() {
-                return '/current.png?v=' + Date.now();
-            }
-
-            setInterval(function(){
-                // We already have the next frame loaded, so switch to it
-                // But prepare the frame after this one, so we can swap them seamlessly
-                // And we need (re)set the current frame for the initial window.onload
-                if ($('#first' ).is(":visible")) {
-                    console.log("first");
-                    $('#first' ).css('background-image', 'url("' + frameNext() + '")');
-                    $('#first' ).hide();
-                    $('#second').css('background-image', 'url("' + frameCurrent() + '")');
-                    $('#second').show();
-                } else {
-                    console.log("second");
-                    $('#first' ).css('background-image', 'url("' + frameCurrent() + '")');
-                    $('#first' ).show();
-                    $('#second').css('background-image', 'url("' + frameNext() + '")');
-                    $('#second').hide();
-                }
+            setInterval(function() {
+                // Use a second "next" div to pre-load the next frame so that it is in the browser's
+                // cache, allowing for an seamless transition with no rolling shutter effect
+                $.ajax({
+                    url: '/increment.json',
+                    dataType: 'json',
+                    success: function(data) {
+                        $('#current' ).css('background-image', 'url("frames/' + data.current + '.png")');
+                        $('#next'    ).css('background-image', 'url("frames/' + data.next    + '.png")');
+                    }
+                });
             }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
             window.onload = function(){
                 if (crop) {
                     $('.frame').addClass('crop');
                 }
-                $('#first' ).css('background-image', 'url("' + frameNext() + '")');
-                $('#second').css('background-image', 'url("' + frameCurrent() + '")');
             };
         </script>
         <style>
@@ -69,12 +54,13 @@
                 transform: translateY(-50%);
                 background-repeat: no-repeat;
                 background-position: center;
-            }
-            .frame#first {
                 display: block;
             }
-            .frame#second {
-                display: none;
+            .frame#current {
+                z-index: 0;
+            }
+            .frame#next {
+                z-index: -1;
             }
             .frame.crop {
                 background-size: auto 1080px;
@@ -83,8 +69,8 @@
     </head>
     <body>
         <div id="container">
-            <div class="frame" id="first"></div>
-            <div class="frame" id="second"></div>
+            <div class="frame" id="current"></div>
+            <div class="frame" id="next"></div>
         </div>
     </body>
 </html>
