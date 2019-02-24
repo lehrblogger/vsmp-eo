@@ -9,9 +9,10 @@
             var params = new URLSearchParams(location.search);
             var fps = parseFloat(params.get('fps'));
             if (!fps) {
-                fps = 480;//23.976216;
+                fps = 23.976216;
             }
             var crop = params.get('crop') === 'true';
+            var caption = params.get('caption') === 'true';
 
             // Display the frame
             setInterval(function() {
@@ -21,6 +22,7 @@
                     url: '/increment.json',
                     dataType: 'json',
                     success: function(data) {
+                        $('.number').text(data.current);
                         $('#current' ).css('background-image', 'url("frames/' + data.current + '.png")');
                         $('#next'    ).css('background-image', 'url("frames/' + data.next    + '.png")');
                     }
@@ -29,6 +31,9 @@
             window.onload = function(){
                 if (crop) {
                     $('.frame').addClass('crop');
+                }
+                if (!caption) {
+                    $('.number').hide();
                 }
             };
         </script>
@@ -65,12 +70,27 @@
             .frame.crop {
                 background-size: auto 1080px;
             }
+            /* This text should be hardly noticeable, and barely legible, on the EO1 */
+            .number {
+                background: inherit;
+                -webkit-background-clip: text;
+                        background-clip: text;
+                color: transparent;
+                filter: invert(1) grayscale(1) contrast(0);
+                text-align: left;
+                font-family: sans-serif;
+                font-size: 8pt;
+            }
         </style>
     </head>
     <body>
         <div id="container">
-            <div class="frame" id="current"></div>
-            <div class="frame" id="next"></div>
+            <div class="frame" id="current">
+                <div class="number"></div>
+            </div>
+            <div class="frame" id="next">
+                <div class="number"></div>
+            </div>
         </div>
     </body>
 </html>
