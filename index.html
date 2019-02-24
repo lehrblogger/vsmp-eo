@@ -5,62 +5,46 @@
         <meta http-equiv="x-dns-prefetch-control" content="off">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script>
-            // Define utility methods
-            function updateFrame(number) {
-                $('.number').text(number);
+            // Parse the URL parameters
+            var params = new URLSearchParams(location.search);
+            var fps = parseFloat(params.get('fps'));
+            if (!fps) {
+                fps = 480;//23.976216;
+            }
+            var crop = params.get('crop') === 'true';
+
+            // Display the frame
+            function frameNext() {
+                return '/next.png?v=' + Date.now();
+            }
+            function frameCurrent() {
+                return '/current.png?v=' + Date.now();
+            }
+
+            setInterval(function(){
                 // We already have the next frame loaded, so switch to it
                 // But prepare the frame after this one, so we can swap them seamlessly
                 // And we need (re)set the current frame for the initial window.onload
-                if (number % 2) {
-                    $('#first' ).css('background-image', 'url("' + frameURL(number + 1) + '")');
+                if ($('#first' ).is(":visible")) {
+                    console.log("first");
+                    $('#first' ).css('background-image', 'url("' + frameNext() + '")');
                     $('#first' ).hide();
-                    $('#second').css('background-image', 'url("' + frameURL(number    ) + '")');
+                    $('#second').css('background-image', 'url("' + frameCurrent() + '")');
                     $('#second').show();
                 } else {
-                    $('#first' ).css('background-image', 'url("' + frameURL(number    ) + '")');
+                    console.log("second");
+                    $('#first' ).css('background-image', 'url("' + frameCurrent() + '")');
                     $('#first' ).show();
-                    $('#second').css('background-image', 'url("' + frameURL(number + 1) + '")');
+                    $('#second').css('background-image', 'url("' + frameNext() + '")');
                     $('#second').hide();
                 }
-            };
-            function frameURL(number) {
-                return 'frames/' + number + '.png'
-            }
-
-            // Parse the URL parameters
-            var params = new URLSearchParams(location.search);
-            var frame_number = parseInt(params.get('frame'));
-            if (!frame_number) {
-                frame_number = 1;
-            }
-            var fps = parseFloat(params.get('fps'));
-            if (!fps) {
-                fps = 23.976216;
-            }
-            var crop = params.get('crop') === 'true';
-            var caption = params.get('caption') === 'true';
-
-            // Display the frame, but check to make sure the next frame exists, otherwise stop
-            // here so that it's easy to pick up where we left off if the server went down
-            setInterval(function(){
-                $.ajax({
-                    url: frameURL(frame_number + 1),
-                    success: function(data) {
-                        frame_number++;
-                        updateFrame(frame_number);
-                        params.set('frame', frame_number);
-                        window.history.replaceState({}, '', `${location.pathname}?${params}`);
-                    }
-                });
             }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
             window.onload = function(){
                 if (crop) {
                     $('.frame').addClass('crop');
                 }
-                if (!caption) {
-                    $('.number').hide();
-                }
-                updateFrame(frame_number);
+                $('#first' ).css('background-image', 'url("' + frameNext() + '")');
+                $('#second').css('background-image', 'url("' + frameCurrent() + '")');
             };
         </script>
         <style>
@@ -85,32 +69,22 @@
                 transform: translateY(-50%);
                 background-repeat: no-repeat;
                 background-position: center;
+            }
+            .frame#first {
                 display: block;
+            }
+            .frame#second {
+                display: none;
             }
             .frame.crop {
                 background-size: auto 1080px;
-            }
-            /* This text should be hardly noticeable, and barely legible, on the EO1 */
-            .number {
-                background: inherit;
-                -webkit-background-clip: text;
-                        background-clip: text;
-                color: transparent;
-                filter: invert(1) grayscale(1) contrast(0);
-                text-align: left;
-                font-family: sans-serif;
-                font-size: 8pt;
             }
         </style>
     </head>
     <body>
         <div id="container">
-            <div class="frame" id="first">
-                <div class="number"></div>
-            </div>
-            <div class="frame" id="second">
-                <div class="number"></div>
-            </div>
+            <div class="frame" id="first"></div>
+            <div class="frame" id="second"></div>
         </div>
     </body>
 </html>
