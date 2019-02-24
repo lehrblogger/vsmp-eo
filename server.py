@@ -18,17 +18,23 @@ class FrameHandler(SimpleHTTPRequestHandler):
         else:
             SimpleHTTPRequestHandler.log_message(self, format, *args)
 
+    def send_frame_numbers(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps({'current': FrameHandler.frame,
+                                     'next'   : FrameHandler.frame + 1}))
+
     def do_GET(self):
         if self.path == '/increment.json':
-            if FrameHandler.frame >= FrameHandler.last:
+            if FrameHandler.frame > FrameHandler.last:
                 self.send_error(404, 'Frame {} Not Found'.format(FrameHandler.frame))
             else:
                 FrameHandler.frame = FrameHandler.frame + 1
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({'current': FrameHandler.frame,
-                                             'next'   : FrameHandler.frame + 1}))
+                self.send_frame_numbers()
+            return
+        if self.path == '/current.json':
+            self.send_frame_numbers()
             return
         if self.path == '/':
             self.path = '/index.html'

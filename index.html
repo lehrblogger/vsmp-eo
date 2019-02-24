@@ -5,7 +5,6 @@
         <meta http-equiv="x-dns-prefetch-control" content="off">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script>
-            // Parse the URL parameters
             var params = new URLSearchParams(location.search);
             var fps = parseFloat(params.get('fps'));
             if (!fps) {
@@ -13,21 +12,7 @@
             }
             var crop = params.get('crop') === 'true';
             var caption = params.get('caption') === 'true';
-
-            // Display the frame
-            setInterval(function() {
-                // Use a second "next" div to pre-load the next frame so that it is in the browser's
-                // cache, allowing for an seamless transition with no rolling shutter effect
-                $.ajax({
-                    url: '/increment.json',
-                    dataType: 'json',
-                    success: function(data) {
-                        $('.number').text(data.current);
-                        $('#current' ).css('background-image', 'url("frames/' + data.current + '.png")');
-                        $('#next'    ).css('background-image', 'url("frames/' + data.next    + '.png")');
-                    }
-                });
-            }, 60 * 60 / fps * 1000);  // Show N frames per hour, instead of N frames per second
+            var is_first = true;
             window.onload = function(){
                 if (crop) {
                     $('.frame').addClass('crop');
@@ -35,6 +20,21 @@
                 if (!caption) {
                     $('.number').hide();
                 }
+                (function updateFrame() {
+                    // Use a second "next" div to pre-load the next frame so that it is in the browser's
+                    // cache, allowing for an seamless transition with no rolling shutter effect
+                    $.ajax({
+                        url: is_first ? '/current.json' :  '/increment.json',
+                        dataType: 'json',
+                        success: function(data) {
+                            $('.number').text(data.current);
+                            $('#current' ).css('background-image', 'url("frames/' + data.current + '.png")');
+                            $('#next'    ).css('background-image', 'url("frames/' + data.next    + '.png")');
+                        }
+                    });
+                    setTimeout(updateFrame, 60 * 60 / fps * 1000);  // Show N frames per hour
+                })();
+                is_first = false;
             };
         </script>
         <style>
