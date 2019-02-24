@@ -10,8 +10,8 @@ Want to do this yourself?
 
  1. You can use https://www.electricobjects.com/set_url to show an arbitrary URL on your device.
  2. You'll need to first extract the frames from whatever movie file you'd like to play slowly. [FFmpeg](https://www.ffmpeg.org/) is great for this. As an alternative, I considered playing the movie file one frame at a time in the browser, but wasn't sure my EO1 would be up to the task and was less familiar with the Javascript involved.
- 3. You'll need to host the frames, along with the index page, somewhere your device can see them. A two-hour movie could easily have a few hundred GBs worth of 1920x1080 frames, so you'll probably want to do this from a machine running a web server on your local wi-fi network.
- 4. There are a few URL parameters for specifying the frame rate (e.g. 30 or 60fps), whether you want to crop or letterbox the frames onto your 16:9 device, and the frame number at which you'd like to start. That last one is useful if you need to pause and want to pick up where you left off, and is why the current frame number is displayed in the top-left corner.
+ 3. You'll need to host the frames, along with the included Python web server, somewhere your device can see them. A two-hour movie could easily have a few hundred GBs worth of 1920x1080 frames, so you'll probably want to do this from a machine running on your local wi-fi network. Note that the web server is pretty simple, so it can only handle one device at a time.
+ 4. There are a few URL parameters for specifying the frame rate (e.g. 30 fps, 60 fps, or more for debugging), whether you want to crop or letterbox the frames onto your 16:9 device, and whether you'd like the current frame number displayed in the top-left corner. There are also a few arguments to specify for the web server, including the first and last frame, the port, and the output locaiton for the logs. The logs are useful for picking up where you left off if something goes wrong.
  2. The included mounting hardware works well in landscape, but the browser won't know that it's sideways, so the CSS uses `transform: rotate` accordingly.
 
 Let me know if you have any questions!
