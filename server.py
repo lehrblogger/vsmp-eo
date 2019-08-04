@@ -2,6 +2,7 @@
 import json
 import logging
 from optparse import OptionParser
+import re
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 import SocketServer
 
@@ -24,6 +25,11 @@ class FrameHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({'current': FrameHandler.frame,
                                      'next'   : FrameHandler.frame + 1}))
+
+    def end_headers(self):
+        if re.search(r'(\/frames\/)([1-9]+)(\.png)', self.path):
+            self.send_header("Cache-Control", "no-store, must-revalidate")
+        SimpleHTTPRequestHandler.end_headers(self)
 
     def do_GET(self):
         if self.path == '/increment.json':
