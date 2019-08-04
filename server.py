@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from eopython import eo as eopython
+import errno
 import json
 import logging
 from optparse import OptionParser
@@ -34,19 +35,25 @@ class FrameHandler(SimpleHTTPRequestHandler):
         SimpleHTTPRequestHandler.end_headers(self)
 
     def do_GET(self):
-        if self.path == '/increment.json':
-            if FrameHandler.frame > FrameHandler.last:
-                self.send_error(404, 'Frame {} Not Found'.format(FrameHandler.frame))
-            else:
-                FrameHandler.frame = FrameHandler.frame + 1
+        try:
+            if self.path == '/increment.json':
+                if FrameHandler.frame > FrameHandler.last:
+                    self.send_error(404, 'Frame {} Not Found'.format(FrameHandler.frame))
+                else:
+                    FrameHandler.frame = FrameHandler.frame + 1
+                    self.send_frame_numbers()
+                return
+            if self.path == '/current.json':
                 self.send_frame_numbers()
-            return
-        if self.path == '/current.json':
-            self.send_frame_numbers()
-            return
-        if self.path == '/':
-            self.path = '/index.html'
-        return SimpleHTTPRequestHandler.do_GET(self)
+                return
+            if self.path == '/':
+                self.path = '/index.html'
+            return SimpleHTTPRequestHandler.do_GET(self)
+        except socket.error as socket_error:
+            if socket_error.errno != errno.EPIPE:
+                raise socket_error
+            else:
+                logging.error('Broken pipe error handled for {}'.format(self.path))
 
 
 # https://stackoverflow.com/a/28950776/551814
