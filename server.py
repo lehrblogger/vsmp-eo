@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+from eopython import eo as eopython
 import json
 import logging
 from optparse import OptionParser
 import re
 from SimpleHTTPServer import SimpleHTTPRequestHandler
+import socket
 import SocketServer
 
 class FrameHandler(SimpleHTTPRequestHandler):
@@ -47,6 +49,20 @@ class FrameHandler(SimpleHTTPRequestHandler):
         return SimpleHTTPRequestHandler.do_GET(self)
 
 
+# https://stackoverflow.com/a/28950776/551814
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
+
 def main():
     usage =  'python server.py -f 1 -l 70000 -p 8000'
     description = 'Turn your Electric Objects EO1 or EO2 into a Very Slow Movie Player.'
@@ -74,15 +90,25 @@ def main():
 
     if not options_ok:
         logging.error('See "python server.py --help" for all options.')
-    else:
-        FrameHandler.frame = options.first
-        FrameHandler.last = options.last
-        if options.log_file:
-            FrameHandler.log_file = open(options.log_file, 'a', 0)
-        Handler = FrameHandler
-        httpd = SocketServer.TCPServer(('', options.port), Handler)
-        httpd.serve_forever()
+        return
 
+    credentials = eopython.get_credentials()
+    if credentials["username"] == "" or credentials["password"] == "":
+        logging.error("The username or password are blank. See code for how to set them. Exiting.")
+        return
+
+    # Set the URL
+    eo = eopython.ElectricObject(username=credentials["username"], password=credentials["password"])
+    eo.set_url('http://{}:{}?crop=true'.format(get_ip(), options.port))
+
+    # Start the server (before Electric Objects tells the device!)
+    FrameHandler.frame = options.first
+    FrameHandler.last = options.last
+    if options.log_file:
+        FrameHandler.log_file = open(options.log_file, 'a', 0)
+    Handler = FrameHandler
+    httpd = SocketServer.TCPServer(('', options.port), Handler)
+    httpd.serve_forever()
 
 if __name__ == '__main__':
     main()
