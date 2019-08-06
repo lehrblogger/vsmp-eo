@@ -31,7 +31,7 @@ class FrameHandler(SimpleHTTPRequestHandler):
 
     def end_headers(self):
         if re.search(r'(\/frames\/)([1-9]+)(\.png)', self.path):
-            self.send_header("Cache-Control", "no-store, must-revalidate")
+            self.send_header("Cache-Control", "no-store")
         SimpleHTTPRequestHandler.end_headers(self)
 
     def do_GET(self):
