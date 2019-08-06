@@ -34,26 +34,29 @@ class FrameHandler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "no-store")
         SimpleHTTPRequestHandler.end_headers(self)
 
-    def do_GET(self):
+    def process_request(self, request, client_address):
         try:
-            if self.path == '/increment.json':
-                if FrameHandler.frame > FrameHandler.last:
-                    self.send_error(404, 'Frame {} Not Found'.format(FrameHandler.frame))
-                else:
-                    FrameHandler.frame = FrameHandler.frame + 1
-                    self.send_frame_numbers()
-                return
-            if self.path == '/current.json':
-                self.send_frame_numbers()
-                return
-            if self.path == '/':
-                self.path = '/index.html'
-            return SimpleHTTPRequestHandler.do_GET(self)
+            SimpleHTTPRequestHandler.process_request(self, request, client_address)
         except socket.error as socket_error:
-            if socket_error.errno != errno.EPIPE:
-                raise socket_error
+            if socket_error.errno == errno.EPIPE:
+                self.log_message('Broken pipe error caught for {}', self.path)
             else:
-                logging.error('Broken pipe error handled for {}'.format(self.path))
+                raise socket_error
+
+    def do_GET(self):
+        if self.path == '/increment.json':
+            if FrameHandler.frame > FrameHandler.last:
+                self.send_error(404, 'Frame {} Not Found'.format(FrameHandler.frame))
+            else:
+                FrameHandler.frame = FrameHandler.frame + 1
+                self.send_frame_numbers()
+            return
+        if self.path == '/current.json':
+            self.send_frame_numbers()
+            return
+        if self.path == '/':
+            self.path = '/index.html'
+        return SimpleHTTPRequestHandler.do_GET(self)
 
 
 # https://stackoverflow.com/a/28950776/551814
