@@ -22,6 +22,7 @@
                     $('.number').hide();
                 }
                 (function updateFrame() {
+                    setTimeout(updateFrame, 60 * 60 / fps * 1000);  // Show N frames per hour
                     // Use a second "next" div to pre-load the next frame and allow
                     // for an seamless transition with no rolling shutter effect
                     $.ajax({
@@ -37,7 +38,6 @@
                             $('.bottom').css('background-image', 'url("frames/' + data.next + '.png")');
                         }
                     });
-                    setTimeout(updateFrame, 60 * 60 / fps * 1000);  // Show N frames per hour
                 })();
                 is_first = false;
             };
