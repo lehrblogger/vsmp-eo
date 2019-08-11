@@ -40,9 +40,15 @@ class FrameHandler(SimpleHTTPRequestHandler):
         except socket.error as socket_error:
             if socket_error.errno == errno.EPIPE:
                 self.log_message('Broken pipe error caught for {}', self.path)
+                print('Broken pipe error caught for {}'.format(self.path))
             else:
                 self.log_message('Raising other socket error with errno {}!={}', socket_error.errno, errno.EPIPE)
+                print('Raising other socket error with errno {}!={}'.format(socket_error.errno, errno.EPIPE))
                 raise socket_error
+        except Exception as error:
+            self.log_message('Caught exception other than socket.error: {}', error)
+            print('Caught exception other than socket.error: {}'.format(error))
+            raise error
 
     def do_GET(self):
         if self.path == '/increment.json':
