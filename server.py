@@ -41,11 +41,12 @@ class FrameHandler(SimpleHTTPRequestHandler):
             if socket_error.errno == errno.EPIPE:
                 self.log_message('Broken pipe error caught for {}', self.path)
             else:
+                self.log_message('Raising other socket error with errno {}!={}', socket_error.errno, errno.EPIPE)
                 raise socket_error
 
     def do_GET(self):
         if self.path == '/increment.json':
-            if FrameHandler.frame > FrameHandler.last:
+            if FrameHandler.frame >= FrameHandler.last:
                 self.send_error(404, 'Frame {} Not Found'.format(FrameHandler.frame))
             else:
                 FrameHandler.frame = FrameHandler.frame + 1
