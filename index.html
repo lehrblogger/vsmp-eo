@@ -22,15 +22,19 @@
                     $('.number').hide();
                 }
                 (function updateFrame() {
-                    // Use a second "next" div to pre-load the next frame so that it is in the browser's
-                    // cache, allowing for an seamless transition with no rolling shutter effect
+                    // Use a second "next" div to pre-load the next frame and allow
+                    // for an seamless transition with no rolling shutter effect
                     $.ajax({
                         url: is_first ? '/current.json' :  '/increment.json',
                         dataType: 'json',
                         success: function(data) {
                             $('.number').text(data.current);
-                            $('#current' ).css('background-image', 'url("frames/' + data.current + '.png")');
-                            $('#next'    ).css('background-image', 'url("frames/' + data.next    + '.png")');
+                            if (is_first) {
+                                $('.top').css('background-image', 'url("frames/' + data.current + '.png")');
+                            } else {
+                                $('.frame').toggleClass('top bottom');
+                            }
+                            $('.bottom').css('background-image', 'url("frames/' + data.next + '.png")');
                         }
                     });
                     setTimeout(updateFrame, 60 * 60 / fps * 1000);  // Show N frames per hour
@@ -62,10 +66,10 @@
                 background-position: center;
                 display: block;
             }
-            .frame#current {
+            .frame.top {
                 z-index: 0;
             }
-            .frame#next {
+            .frame.bottom {
                 z-index: -1;
             }
             .frame.crop {
@@ -86,10 +90,10 @@
     </head>
     <body>
         <div id="container">
-            <div class="frame" id="current">
+            <div class="frame top">
                 <div class="number"></div>
             </div>
-            <div class="frame" id="next">
+            <div class="frame bottom">
                 <div class="number"></div>
             </div>
         </div>
